@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Final Minimalist</title>
+    <title>MV Maker Pro - Clean Minimal</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
 
         .viewport { 
             width: 100vw; height: 100vh; display: flex; flex-direction: column; 
@@ -16,13 +16,13 @@
         
         #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.2) blur(20px); z-index: 1; transition: 0.8s; }
         
+        /* 舞台區 */
         .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; gap: 8px; }
 
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; margin-bottom: 5px; }
         .tonearm { 
             position: absolute; width: 130px; top: -10px; right: -10px; z-index: 100; 
             transform-origin: 110px 25px; transform: rotate(-38deg); transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.6));
         }
         .tonearm.active { transform: rotate(5deg); }
 
@@ -30,21 +30,20 @@
             width: 240px; height: 240px; border-radius: 50%; background: #111; border: 4px solid #222;
             box-shadow: 0 10px 45px rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .record-spin { 
-            width: 225px; height: 225px; border-radius: 50%; overflow: hidden; 
-            animation: rotate 20s linear infinite; animation-play-state: paused; background: #000; 
-        }
+        .record-spin { width: 225px; height: 225px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; background: #000; }
         #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); transition: opacity 0.4s; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .turntable-controls { margin: 15px 0; display: flex; gap: 20px; justify-content: center; }
+        /* 霓虹按鈕 */
+        .turntable-controls { margin: 15px 0; display: flex; gap: 20px; justify-content: center; align-items: center; }
         .turntable-controls span { 
             cursor: pointer; font-size: 32px; 
-            text-shadow: 0 0 10px #fff, 0 0 20px rgba(255,255,255,0.7), 0 0 30px rgba(255,255,255,0.3); 
+            text-shadow: 0 0 10px #fff, 0 0 20px rgba(255,255,255,0.7); 
             -webkit-text-fill-color: white; transition: 0.2s;
         }
 
+        /* 歌詞區與隱藏按鈕 */
         .lyrics-side { 
             width: 90%; height: 240px; overflow: hidden; position: relative; 
             mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); 
@@ -54,11 +53,17 @@
         .lyric-line { padding: 12px 0; font-size: 16px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
-        .upload-tools { position: absolute; bottom: 5px; right: 10px; display: flex; gap: 10px; z-index: 100; opacity: 0.35; }
-        .mini-btn { background: rgba(255,255,255,0.15); color: #fff; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid rgba(255,255,255,0.2); }
+        /* 整合在歌詞區角落的小工具 */
+        .upload-tools { position: absolute; bottom: 5px; right: 10px; display: flex; gap: 10px; z-index: 100; opacity: 0.3; }
+        .mini-btn { 
+            background: rgba(255,255,255,0.1); color: #fff; width: 32px; height: 32px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-size: 14px; border: 1px solid rgba(255,255,255,0.2); 
+        }
 
-        .ui-panel { position: relative; width: 100%; padding-bottom: 25px; z-index: 1000; display: flex; flex-direction: column; align-items: center; background: linear-gradient(transparent, #000); }
-        .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        /* 底部操作面板：徹底移除舊的 btn-row */
+        .ui-panel { position: relative; width: 100%; padding-bottom: 30px; z-index: 1000; display: flex; flex-direction: column; align-items: center; background: linear-gradient(transparent, #000); }
+        .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
         #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); }
         .time-lab { font-size: 11px; opacity: 0.5; min-width: 40px; text-align: center; font-family: monospace; }
 
@@ -82,9 +87,11 @@
                     </div>
                 </div>
             </div>
+            
             <div class="turntable-controls">
                 <span id="btn-loop">&#10227;&#xFE0E;</span><span id="btn-prev">&#9194;&#xFE0E;</span><span id="btn-toggle">&#9654;&#xFE0E;</span><span id="btn-next">&#9193;&#xFE0E;</span><span id="btn-like">&#9825;&#xFE0E;</span>
             </div>
+
             <div class="lyrics-side">
                 <ul id="lyrics-list"><li class="lyric-line">尚未載入素材...</li></ul>
                 <div class="upload-tools">
@@ -94,6 +101,7 @@
                 </div>
             </div>
         </div>
+
         <div class="ui-panel">
             <div class="seek-box">
                 <span id="cur-time" class="time-lab">00:00</span>
@@ -104,7 +112,9 @@
         </div>
     </div>
 
-    <input type="file" id="up-img" accept="image/*" style="display:none"><input type="file" id="up-mp3" accept="audio/mp3" style="display:none"><input type="file" id="up-lrc" accept=".lrc" style="display:none">
+    <input type="file" id="up-img" accept="image/*" style="display:none">
+    <input type="file" id="up-mp3" accept="audio/mp3" style="display:none">
+    <input type="file" id="up-lrc" accept=".lrc" style="display:none">
     <audio id="audio-player"></audio>
 
     <script>
@@ -133,7 +143,7 @@
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        let text = line.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/<.*?>/g, '').replace(/\{.*?\}/g, '').trim();
+                        let text = line.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').trim();
                         return text ? { time, text } : null;
                     }
                     return null;
@@ -172,10 +182,6 @@
 
         seekBar.oninput = () => { audio.currentTime = seekBar.value; };
         function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
-
-        document.getElementById('rec-btn').onclick = () => {
-            alert("iPad/iPhone 請使用內建錄影。開始錄影後，按下播放鍵即可同步錄製畫面。");
-        };
     </script>
 </body>
 </html>
