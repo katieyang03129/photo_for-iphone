@@ -38,8 +38,44 @@
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* 素雅控制按鈕：徹底棄用圖示符號 */
-        .turntable-controls { margin-top: 10px; display: flex; gap: 15px; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
-        .turntable-controls span { cursor: pointer; font-size: 13px; font-weight: 200; opacity: 0.7; width: 45px; text-align: center; letter-spacing: 1px; }
+        /* 控制按鈕容器 */
+        .turntable-controls { 
+            margin-top: 25px; 
+            display: flex; 
+            gap: 15px; 
+            justify-content: center;
+            pointer-events: auto;
+        }
+        
+        /* 讓按鈕變大、變亮的核心設定 */
+        .turntable-controls span { 
+            cursor: pointer; 
+            display: inline-block; 
+            width: 60px; /* 加寬按鈕，方便點按 */
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            
+            color: #fff;
+            font-size: 20px;     /* 字體調大，發光才明顯 */
+            font-weight: 500;     /* 稍微加粗，增加發光面積 */
+            letter-spacing: 1px;
+            opacity: 0.9;
+            
+            /* [多層發光魔法]：第一層白光 + 第二層擴散暈染 */
+            text-shadow: 
+                0 0 10px #fff, 
+                0 0 20px rgba(255,255,255,0.6),
+                0 0 30px rgba(255,255,255,0.3);
+                
+            transition: 0.3s;
+        }
+        
+        /* 按下去的視覺回饋 */
+        .turntable-controls span:active {
+            transform: scale(0.9);
+            text-shadow: 0 0 5px #fff;
+        }
 
         /* 歌詞區 */
         .lyrics-side { width: 90%; height: 160px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
