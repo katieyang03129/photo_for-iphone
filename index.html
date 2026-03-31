@@ -28,10 +28,30 @@
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* 控制按鈕：強制禁止 Emoji */
-        .turntable-controls { margin-top: 15px; display: flex; gap: 20px; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.9); }
+        .turntable-controls { 
+            margin-top: 25px; 
+            display: flex; 
+            gap: 20px; 
+            color: #fff; 
+            /* 素雅的淡淡白光 */
+            text-shadow: 0 0 8px rgba(255,255,255,0.6); 
+            pointer-events: auto; 
+            justify-content: center;
+            /* 強制使用最素的系統字體，不帶任何圖標色彩 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
         .turntable-controls span { 
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; cursor: pointer; color: white !important; -webkit-text-fill-color: white !important;
+            cursor: pointer; 
+            display: inline-block; 
+            width: 45px;
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            font-size: 18px; /* 縮小一點點，更有質感 */
+            font-weight: 200; /* 把線條調到最細 */
+            letter-spacing: 1px;
+        }
         }
 
         /* 歌詞區：精準解析過濾後顯示 */
@@ -63,11 +83,11 @@
                     </div>
                 </div>
                 <div class="turntable-controls">
-                    <span id="btn-loop">⇄&#xFE0E;</span>
-                    <span id="btn-prev">⏮&#xFE0E;</span>
-                    <span id="btn-toggle">▶&#xFE0E;</span>
-                    <span id="btn-next">⏭&#xFE0E;</span>
-                    <span id="btn-like">♡&#xFE0E;</span>
+                    <span id="btn-loop">LOOP</span>
+                    <span id="btn-prev">«</span>
+                    <span id="btn-toggle">I I</span>
+                    <span id="btn-next">»</span>
+                    <span id="btn-like">♡</span>
                 </div>
             </div>
             <div class="lyrics-side">
