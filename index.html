@@ -3,28 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MV Maker Mobile - Professional Edition</title>
+    <title>MV Maker Mobile - Neon Professional</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.35); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
 
-        /* 視窗容器 */
         .viewport { width: 100vw; height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* 背景模糊圖層 */
         #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.3); z-index: 1; transition: 0.8s; }
         
-        /* 舞台區域：垂直排列所有元件 */
-        .stage-wrapper { 
-            position: relative; flex: 1; width: 100%; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; 
-            z-index: 10; padding: 20px 0; 
-        }
+        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; z-index: 10; padding: 20px 0; }
 
-        /* 唱機區佈局 */
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; }
         
-        /* 唱針：固定在唱機右上方 */
+        /* 唱針：固定位置 */
         .tonearm {
             position: absolute; width: 140px; top: -15px; right: -10px; z-index: 100;
             transform-origin: 120px 25px; transform: rotate(-38deg); transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -32,7 +23,6 @@
         }
         .tonearm.active { transform: rotate(5deg); }
 
-        /* 唱盤主體 */
         .platter {
             width: 260px; height: 260px; border-radius: 50%;
             background: #111; border: 5px solid #222;
@@ -49,7 +39,7 @@
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* [重要] 素雅發光控制項 */
+        /* [關鍵] 素雅發光符號按鈕 */
         .turntable-controls { 
             margin: 15px 0; 
             display: flex; 
@@ -59,20 +49,22 @@
         }
         .turntable-controls span { 
             cursor: pointer; display: inline-block; width: 60px; text-align: center;
-            color: #fff; font-size: 16px; font-weight: 500; letter-spacing: 1px; opacity: 0.9;
-            /* 三層發光效果 */
-            text-shadow: 0 0 10px #fff, 0 0 20px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.2);
+            color: #fff; 
+            font-size: 26px; /* 調大尺寸讓發光明顯 */
+            font-weight: normal;
+            opacity: 0.9;
+            /* 三層發光：強化霓虹質感 */
+            text-shadow: 0 0 10px #fff, 0 0 20px rgba(255,255,255,0.6), 0 0 30px rgba(255,255,255,0.2);
             transition: 0.3s;
+            -webkit-text-fill-color: white; /* 確保 iOS 不會變色 */
         }
         .turntable-controls span:active { transform: scale(0.9); opacity: 1; }
 
-        /* 歌詞區域 */
         .lyrics-side { width: 90%; height: 180px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
         #lyrics-list { position: absolute; width: 100%; top: 75px; transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
         .lyric-line { padding: 12px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; opacity: 1; }
 
-        /* 底部 UI 面板 */
         .ui-panel { position: relative; width: 100%; padding-bottom: 35px; background: linear-gradient(transparent, #000); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
         .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
         #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); }
@@ -103,12 +95,7 @@
             </div>
             
             <div class="turntable-controls">
-                <span id="btn-loop">LOOP</span>
-                <span id="btn-prev">PREV</span>
-                <span id="btn-toggle">PLAY</span>
-                <span id="btn-next">NEXT</span>
-                <span id="btn-like">LIKE</span>
-            </div>
+                <span id="btn-loop">&#10227;&#xFE0E;</span> <span id="btn-prev">&#9194;&#xFE0E;</span>  <span id="btn-toggle">&#9654;&#xFE0E;</span> <span id="btn-next">&#9193;&#xFE0E;</span>  <span id="btn-like">&#9825;&#xFE0E;</span>  </div>
 
             <div class="lyrics-side">
                 <ul id="lyrics-list"><li class="lyric-line">尚未載入歌詞...</li></ul>
@@ -144,14 +131,12 @@
         const spinBox = document.getElementById('spin-box');
         let lyricsData = [];
 
-        // 圖片處理
         document.getElementById('up-img').onchange = (e) => {
             const url = URL.createObjectURL(e.target.files[0]);
             recordImg.src = url; recordImg.style.opacity = 1;
             document.getElementById('bg').style.backgroundImage = `url(${url})`;
         };
 
-        // 音樂處理
         document.getElementById('up-mp3').onchange = (e) => {
             audio.src = URL.createObjectURL(e.target.files[0]);
             audio.onloadedmetadata = () => { 
@@ -161,7 +146,6 @@
         };
         seekBar.oninput = () => { audio.currentTime = seekBar.value; };
 
-        // 歌詞處理 (強力過濾器)
         document.getElementById('up-lrc').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -170,7 +154,6 @@
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        // 清除所有括號雜訊
                         let text = line.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/<.*?>/g, '').replace(/\{.*?\}/g, '').trim();
                         return text ? { time, text } : null;
                     }
@@ -181,26 +164,24 @@
             reader.readAsText(e.target.files[0]);
         };
 
-        // 播放控制
         function togglePlay() {
             const btn = document.getElementById('btn-toggle');
             if(audio.paused) { 
                 audio.play(); 
                 spinBox.style.animationPlayState = 'running'; 
                 arm.classList.add('active'); 
-                btn.innerText = "PAUSE";
+                btn.innerHTML = "&#9208;&#xFE0E;"; // 暫停符號
             } else { 
                 audio.pause(); 
                 spinBox.style.animationPlayState = 'paused'; 
                 arm.classList.remove('active'); 
-                btn.innerText = "PLAY";
+                btn.innerHTML = "&#9654;&#xFE0E;"; // 播放符號
             }
         }
         document.getElementById('btn-toggle').onclick = togglePlay;
         document.getElementById('btn-prev').onclick = () => { audio.currentTime = 0; };
         document.getElementById('btn-next').onclick = () => { audio.currentTime += 10; };
 
-        // 歌詞滾動
         audio.ontimeupdate = () => {
             seekBar.value = audio.currentTime;
             document.getElementById('cur-time').innerText = formatTime(audio.currentTime);
@@ -210,20 +191,12 @@
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 46}px)`; // 依照行高捲動
+                    lyricsList.style.transform = `translateY(-${index * 46}px)`;
                 }
             }
         };
 
-        function formatTime(s) { 
-            const m = Math.floor(s/60); 
-            const sec = Math.floor(s%60); 
-            return `${m}:${sec.toString().padStart(2,'0')}`; 
-        }
-
-        document.getElementById('dl-btn').onclick = () => {
-            alert("Demo 提示：手機版不支援影片錄製，請使用電腦版 Chrome 進行輸出。");
-        };
+        function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
     </script>
 </body>
 </html>
