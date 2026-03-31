@@ -3,73 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MV Maker Final Mobile</title>
+    <title>MV Maker Mobile - Minimalist</title>
     <style>
-        :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.4); }
+        :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.35); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
 
-        .viewport { width: 100vw; height: 100vh; position: relative; overflow: hidden; background: #000; display: flex; flex-direction: column; }
+        .viewport { width: 100vw; height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.3); z-index: 1; transition: 0.8s; }
         
-        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; z-index: 10; padding-top: 10px; }
+        /* 舞台：垂直排列 */
+        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; z-index: 10; padding: 20px 0; }
 
-        .player-side { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; }
-        
-        /* [補回] 唱針樣式：確保在最上層且位置正確 */
-        .tonearm {
-            position: absolute; width: 140px; top: -15px; right: 25px; z-index: 100;
-            transform-origin: 120px 25px; transform: rotate(-38deg); transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.5)); pointer-events: none;
-        }
-        .tonearm.active { transform: rotate(5deg); }
-
+        /* 唱機區 */
+        .player-side { position: relative; width: 280px; display: flex; justify-content: center; }
         .platter {
             width: 260px; height: 260px; border-radius: 50%;
             background: #111; border: 5px solid #222;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
             display: flex; align-items: center; justify-content: center; position: relative;
         }
+
+        /* 唱針：固定在右上方 */
+        .tonearm {
+            position: absolute; width: 130px; top: -10px; right: -10px; z-index: 100;
+            transform-origin: 110px 25px; transform: rotate(-38deg); transition: 1.2s;
+            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.5)); pointer-events: none;
+        }
+        .tonearm.active { transform: rotate(5deg); }
+
         .record-spin { width: 245px; height: 245px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; position: relative; background: #000; }
         #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s; }
         .placeholder-text { position: absolute; color: rgba(255,255,255,0.2); font-size: 14px; letter-spacing: 4px; text-shadow: 0 0 10px #fff; z-index: 0; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* [素雅化] 控制按鈕樣式 */
-        .turntable-controls { 
-            margin-top: 25px; 
-            display: flex; 
-            gap: 20px; 
-            color: #fff; 
-            text-shadow: 0 0 8px rgba(255,255,255,0.6); 
-            pointer-events: auto; 
-            justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            letter-spacing: 1px;
-        }
-        
-        .turntable-controls span { 
-            cursor: pointer; 
-            display: inline-block; 
-            width: 45px; height: 45px; line-height: 45px;
-            text-align: center;
-            font-size: 16px; 
-            font-weight: 200; /* 極細線條感 */
-            opacity: 0.8;
-        }
+        /* 素雅控制按鈕：徹底棄用圖示符號 */
+        .turntable-controls { margin-top: 10px; display: flex; gap: 15px; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+        .turntable-controls span { cursor: pointer; font-size: 13px; font-weight: 200; opacity: 0.7; width: 45px; text-align: center; letter-spacing: 1px; }
 
-        .lyrics-side { width: 90%; height: 180px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
-        #lyrics-list { position: absolute; width: 100%; top: 75px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
-        .lyric-line { padding: 12px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.3; }
-        .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
+        /* 歌詞區 */
+        .lyrics-side { width: 90%; height: 160px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
+        #lyrics-list { position: absolute; width: 100%; top: 65px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
+        .lyric-line { padding: 10px 0; font-size: 16px; color: var(--lyric-sub); line-height: 1.4; }
+        .lyric-line.active { color: #fff; font-size: 20px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
-        .ui-panel { position: relative; width: 100%; padding-bottom: 30px; background: linear-gradient(transparent, #000); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
+        /* 操作面板 */
+        .ui-panel { position: relative; width: 100%; padding-bottom: 35px; background: linear-gradient(transparent, #000); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
         .seek-box { width: 85%; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
         #seek-bar { flex: 1; accent-color: var(--gold); }
-        .time-lab { font-size: 11px; opacity: 0.7; width: 40px; }
+        .time-lab { font-size: 11px; opacity: 0.7; }
 
         .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 90%; }
-        .btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
+        .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
         .btn-dl { background: var(--gold); color: #000; border: none; flex-basis: 90%; margin-top: 5px; padding: 12px; font-weight: bold; }
     </style>
 </head>
@@ -89,14 +74,16 @@
                         <img id="record-img" src="" style="opacity:0;">
                     </div>
                 </div>
-                <div class="turntable-controls">
-                    <span id="btn-loop">LOOP</span>
-                    <span id="btn-prev">«</span>
-                    <span id="btn-toggle">I I</span>
-                    <span id="btn-next">»</span>
-                    <span id="btn-like">♡</span>
-                </div>
             </div>
+            
+            <div class="turntable-controls">
+                <span id="btn-loop">LOOP</span>
+                <span id="btn-prev">PREV</span>
+                <span id="btn-toggle">PLAY</span>
+                <span id="btn-next">NEXT</span>
+                <span id="btn-like">LIKE</span>
+            </div>
+
             <div class="lyrics-side">
                 <ul id="lyrics-list"><li class="lyric-line">尚未載入歌詞...</li></ul>
             </div>
@@ -148,6 +135,7 @@
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
+                        // 強力過濾所有括號內容
                         let text = line.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/<.*?>/g, '').replace(/\{.*?\}/g, '').trim();
                         return text ? { time, text } : null;
                     }
@@ -162,13 +150,13 @@
             if(audio.paused) { 
                 audio.play(); 
                 document.getElementById('spin-box').style.animationPlayState='running'; 
-                arm.classList.add('active'); // 唱針動作
-                document.getElementById('btn-toggle').innerText = "I I";
+                arm.classList.add('active'); 
+                document.getElementById('btn-toggle').innerText = "PAUSE";
             } else { 
                 audio.pause(); 
                 document.getElementById('spin-box').style.animationPlayState='paused'; 
-                arm.classList.remove('active'); // 唱針收回
-                document.getElementById('btn-toggle').innerText = "▶\uFE0E";
+                arm.classList.remove('active'); 
+                document.getElementById('btn-toggle').innerText = "PLAY";
             }
         }
         document.getElementById('btn-toggle').onclick = togglePlay;
@@ -182,7 +170,7 @@
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 46}px)`;
+                    lyricsList.style.transform = `translateY(-${index * 44}px)`;
                 }
             }
         };
