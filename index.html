@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>專業擬真 9:16 MV 製作器 - 手機 Demo 版</title>
+    <style>
+        :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.4); }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+
+        /* 手機版 Viewport：改為垂直比例 */
+        .viewport { 
+            width: 100vw; 
+            height: 100vh; 
+            position: relative; 
+            overflow: hidden; 
+            background: #000; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* [底層] 背景 */
+        #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.3); z-index: 1; transition: 0.8s; }
+        
+        /* 水波紋改在下方 */
+        .water-layer {
+            position: absolute; bottom: 0; width: 100%; height: 30%; z-index: 2;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1));
+            backdrop-filter: blur(4px);
+            filter: url(#turbulence-water) brightness(1.2); 
+            mask-image: linear-gradient(to top, black 25%, transparent);
+            pointer-events: none; opacity: 0.5;
+        }
+
+        /* [中層] 舞台改為垂直佈局 */
+        .stage-wrapper {
+            position: relative; flex: 1; width: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            gap: 40px; z-index: 10; padding-top: 40px;
+        }
+
+        /* 唱機區縮小以符合寬度 */
+        .player-side { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .platter {
+            width: 280px; height: 280px; border-radius: 50%;
+            background: #111; border: 6px solid #222;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .record-spin {
+            width: 260px; height: 260px; border-radius: 50%; overflow: hidden;
+            animation: rotate 20s linear infinite; animation-play-state: paused;
+        }
+        #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); }
+
+        /* 唱針縮小 */
+        .tonearm {
+            position: absolute; width: 150px; top: -20px; right: 20px; z-index: 50;
+            transform-origin: 130px 30px; transform: rotate(-38deg); transition: 1.2s;
+        }
+        .tonearm.active { transform: rotate(5deg); }
+
+        /* 歌詞區改在下方 */
+        .lyrics-side { 
+            width: 90%; height: 250px; overflow: hidden; position: relative; 
+            mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); 
+        }
+        #lyrics-list { position: absolute; width: 100%; top: 100px; transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); list-style: none; padding: 0; margin: 0; text-align: center;}
+        .lyric-line { padding: 15px 0; font-size: 18px; color: var(--lyric-sub); transition: 0.4s; }
+        .lyric-line.active { color: #fff; font-size: 24px; font-weight: bold; text-shadow: 0 0 15px rgba(255,255,255,0.8); }
+
+        /* 控制按鈕：發光白色 */
+        .turntable-controls { 
+            margin-top: 25px; display: flex; gap: 20px; font-size: 28px; color: #fff; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.8); 
+        }
+
+        /* [頂層] 操作面板 */
+        .ui-panel {
+            position: relative; width: 100%; padding-bottom: 30px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            z-index: 1000; display: flex; flex-direction: column; align-items: center;
+        }
+        .seek-box { width: 85%; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        #seek-bar { flex: 1; accent-color: var(--gold); }
+        .time-lab { font-size: 12px; opacity: 0.7; width: 40px; }
+
+        .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 90%; }
+        .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-dl { background: var(--gold); color: #000; border: none; flex-basis: 100%; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <svg style="display:none">
+        <filter id="turbulence-water" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.06" numOctaves="3" seed="1">
+                <animate attributeName="baseFrequency" dur="20s" values="0.01 0.06; 0.005 0.04; 0.01 0.06" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" scale="20" />
+        </filter>
+    </svg>
+
+    <div class="viewport">
+        <div id="bg"></div>
+        <div class="water-layer"></div>
+
+        <div class="stage-wrapper">
+            <div class="player-side">
+                <svg class="tonearm" id="arm" viewBox="0 0 250 300">
+                    <circle cx="190" cy="40" r="22" fill="#333" stroke="#555" stroke-width="2"/>
+                    <path d="M190,40 L190,130 L160,210 L145,240" stroke="#bbb" stroke-width="10" fill="none" stroke-linecap="round"/>
+                    <rect x="130" y="240" width="30" height="40" rx="3" fill="#222" />
+                </svg>
+                <div class="platter">
+                    <div class="record-spin" id="spin-box">
+                        <img id="record-img" src="https://via.placeholder.com/800?text=Upload+Photo">
+                    </div>
+                </div>
+                <div class="turntable-controls">
+                    <span id="btn-loop">⇄</span>
+                    <span id="btn-prev">⏮</span>
+                    <span id="btn-toggle">▶</span>
+                    <span id="btn-next">⏭</span>
+                    <span id="btn-like">♡</span>
+                </div>
+            </div>
+
+            <div class="lyrics-side">
+                <ul id="lyrics-list"><li class="lyric-line">尚未載入歌詞...</li></ul>
+            </div>
+        </div>
+
+        <div class="ui-panel">
+            <div class="seek-box">
+                <span id="cur-time" class="time-lab">00:00</span>
+                <input type="range" id="seek-bar" value="0" step="0.01">
+                <span id="total-time" class="time-lab">00:00</span>
+            </div>
+            <div class="btn-row">
+                <label class="btn" for="up-img">📸 圖片</label>
+                <label class="btn" for="up-mp3">🎵 音樂</label>
+                <label class="btn" for="up-lrc">📄 LRC</label>
+                <button class="btn btn-dl" id="dl-btn">💾 輸出錄製 MV</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="up-img" accept="image/*" style="display:none">
+    <input type="file" id="up-mp3" accept="audio/mp3" style="display:none">
+    <input type="file" id="up-lrc" accept=".lrc" style="display:none">
+    <audio id="audio-player"></audio>
+
+    <script>
+        // ... (JS 部分保持不變，邏輯完全相容) ...
+        const audio = document.getElementById('audio-player');
+        const seekBar = document.getElementById('seek-bar');
+        const lyricsList = document.getElementById('lyrics-list');
+        const spinBox = document.getElementById('spin-box');
+        const recordImg = document.getElementById('record-img');
+        const arm = document.getElementById('arm');
+        const bg = document.getElementById('bg');
+        let lyricsData = [];
+
+        document.getElementById('up-img').onchange = (e) => {
+            const url = URL.createObjectURL(e.target.files[0]);
+            recordImg.src = url; bg.style.backgroundImage = `url(${url})`;
+        };
+
+        document.getElementById('up-mp3').onchange = (e) => {
+            audio.src = URL.createObjectURL(e.target.files[0]);
+            audio.onloadedmetadata = () => { 
+                document.getElementById('total-time').innerText = formatTime(audio.duration); 
+                seekBar.max = audio.duration; 
+            };
+        };
+        seekBar.oninput = () => { audio.currentTime = seekBar.value; };
+
+        document.getElementById('up-lrc').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const lines = ev.target.result.split('\n');
+                lyricsData = lines.map(line => {
+                    const m = line.match(/\[(\d+):(\d+\.\d+)\]/);
+                    if (m) {
+                        const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
+                        let text = line.replace(/\[.*?\]/g, '').trim();
+                        return text ? { time, text } : null;
+                    }
+                    return null;
+                }).filter(x => x);
+                lyricsList.innerHTML = lyricsData.map(l => `<li class="lyric-line">${l.text}</li>`).join('');
+            };
+            reader.readAsText(e.target.files[0]);
+        };
+
+        function togglePlayState() {
+            if(audio.paused) {
+                audio.play(); arm.classList.add('active'); 
+                spinBox.style.animationPlayState = 'running';
+                document.getElementById('btn-toggle').innerText = "⏸";
+            } else {
+                audio.pause(); arm.classList.remove('active'); 
+                spinBox.style.animationPlayState = 'paused';
+                document.getElementById('btn-toggle').innerText = "▶";
+            }
+        }
+        document.getElementById('btn-toggle').onclick = togglePlayState;
+
+        audio.ontimeupdate = () => {
+            const cur = audio.currentTime + 0.2; 
+            seekBar.value = audio.currentTime;
+            document.getElementById('cur-time').innerText = formatTime(audio.currentTime);
+            const index = lyricsData.findIndex((l, i) => cur >= l.time && (!lyricsData[i+1] || cur < lyricsData[i+1].time));
+            if (index !== -1) {
+                const lines = document.querySelectorAll('.lyric-line');
+                lines.forEach(l => l.classList.remove('active'));
+                if(lines[index]) {
+                    lines[index].classList.add('active');
+                    lyricsList.style.transform = `translateY(-${index * 50}px)`; 
+                }
+            }
+        };
+
+        function formatTime(s) { const m = Math.floor(s / 60); const sec = Math.floor(s % 60); return `${m}:${sec.toString().padStart(2,'0')}`; }
+
+        // 下載功能在手機端僅作 Demo 提示
+        document.getElementById('dl-btn').onclick = () => {
+            alert("Demo 提示：手機端不支援分頁錄製，請使用電腦版 Chrome 進行影片輸出。");
+        };
+    </script>
+</body>
+</html>
