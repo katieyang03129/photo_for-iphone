@@ -36,12 +36,47 @@
             display: flex; align-items: center; justify-content: center; position: relative;
         }
         .record-spin {
-            width: 260px; height: 260px; border-radius: 50%; overflow: hidden;
-            animation: rotate 20s linear infinite; animation-play-state: paused;
-            cursor: grab; position: relative;
+/* 唱片圓盤底色與發光提示 */
+        .record-spin {
+            width: 260px; 
+            height: 260px; 
+            border-radius: 50%; 
+            overflow: hidden;
+            background: #111; /* 沒照片時的深灰色底 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: grab;
+            animation: rotate 20s linear infinite; 
+            animation-play-state: paused;
         }
-        #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); transition: left 0.1s; pointer-events: none; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* 這裡是方案三的核心：沒照片時顯示的發光文字 */
+        .record-spin::before {
+            content: "READY"; /* 妳可以改成 MUSE 或 SELECT PHOTO */
+            font-size: 14px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.2); 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); 
+            position: absolute;
+            z-index: 0; 
+        }
+        
+        /* 隱藏那個醜醜的藍色小問號 */
+        #record-img:not([src]), #record-img[src=""] {
+            opacity: 0;
+        }
+        
+        #record-img {
+            position: absolute;
+            z-index: 1; /* 照片上傳後會蓋在文字上面 */
+            height: 100%;
+            min-width: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.1s;
+        }
 
         .tonearm {
             position: absolute; width: 150px; top: -20px; right: 30px; z-index: 50;
@@ -118,7 +153,7 @@
                 </svg>
                 <div class="platter">
                     <div class="record-spin" id="spin-box">
-                        <img id="record-img" src="https://via.placeholder.com/800?text=Upload+Photo">
+                        <img id="record-img" src="">
                     </div>
                 </div>
                 <div class="turntable-controls">
