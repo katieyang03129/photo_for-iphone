@@ -56,7 +56,28 @@
         .lyric-line { padding: 15px 0; font-size: 18px; color: var(--lyric-sub); transition: 0.4s; line-height: 1.4; }
         .lyric-line.active { color: #fff; font-size: 24px; font-weight: bold; text-shadow: 0 0 20px rgba(255,255,255,0.8); opacity: 1; }
 
-        .turntable-controls { margin-top: 25px; display: flex; gap: 20px; font-size: 28px; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.8); pointer-events: auto; justify-content: center; }
+        .turntable-controls { 
+            margin-top: 25px; 
+            display: flex; 
+            gap: 20px; 
+            font-size: 28px; 
+            color: #fff; 
+            text-shadow: 0 0 15px rgba(255,255,255,0.9); /* 加強發光感 */
+            pointer-events: auto; 
+            justify-content: center;
+            /* 關鍵：強制讓手機使用黑白字體，不要轉成彩色 Emoji */
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+        }
+    
+        .turntable-controls span { 
+            cursor: pointer; 
+            display: inline-block; 
+            width: 45px; /* 給按鈕固定的寬度，才不會點不到 */
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            -webkit-text-fill-color: white; /* 強制填充白色 */
+        }
 
         /* 操作面板 */
         .ui-panel {
