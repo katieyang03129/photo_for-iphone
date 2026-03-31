@@ -4,91 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>專業擬真 9:16 MV 製作器 - 手機 Demo 版</title>
-    <style>
-        :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.4); }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+<style>
+    :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.4); }
+    body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
 
-        /* 手機版 Viewport：改為垂直比例 */
-        .viewport { 
-            width: 100vw; 
-            height: 100vh; 
-            position: relative; 
-            overflow: hidden; 
-            background: #000; 
-            display: flex;
-            flex-direction: column;
-        }
+    /* 改為彈性佈局，自動撐滿 */
+    .viewport { 
+        width: 100vw; 
+        height: 100vh; 
+        position: relative; 
+        overflow: hidden; 
+        background: #000; 
+        display: flex;
+        flex-direction: column;
+    }
 
-        /* [底層] 背景 */
-        #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.3); z-index: 1; transition: 0.8s; }
-        
-        /* 水波紋改在下方 */
-        .water-layer {
-            position: absolute; bottom: 0; width: 100%; height: 30%; z-index: 2;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1));
-            backdrop-filter: blur(4px);
-            filter: url(#turbulence-water) brightness(1.2); 
-            mask-image: linear-gradient(to top, black 25%, transparent);
-            pointer-events: none; opacity: 0.5;
-        }
+    #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.3); z-index: 1; }
+    
+    .water-layer {
+        position: absolute; bottom: 0; width: 100%; height: 30%; z-index: 2;
+        background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1));
+        backdrop-filter: blur(4px);
+        filter: url(#turbulence-water) brightness(1.2); 
+        mask-image: linear-gradient(to top, black 25%, transparent);
+        pointer-events: none; opacity: 0.5;
+    }
 
-        /* [中層] 舞台改為垂直佈局 */
-        .stage-wrapper {
-            position: relative; flex: 1; width: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            gap: 40px; z-index: 10; padding-top: 40px;
-        }
+    /* 關鍵修正：使用 flex: 1 讓舞台區自動調整 */
+    .stage-wrapper {
+        position: relative; 
+        flex: 1; 
+        width: 100%;
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: space-evenly; /* 均勻分配空間 */
+        z-index: 10; 
+        padding: 20px 0;
+    }
 
-        /* 唱機區縮小以符合寬度 */
-        .player-side { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .platter {
-            width: 280px; height: 280px; border-radius: 50%;
-            background: #111; border: 6px solid #222;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            display: flex; align-items: center; justify-content: center; position: relative;
-        }
-        .record-spin {
-            width: 260px; height: 260px; border-radius: 50%; overflow: hidden;
-            animation: rotate 20s linear infinite; animation-play-state: paused;
-        }
-        #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); }
+    .player-side { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    
+    /* 唱機縮小一點，避免擠壓 */
+    .platter {
+        width: 250px; height: 250px; border-radius: 50%;
+        background: #111; border: 5px solid #222;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+        display: flex; align-items: center; justify-content: center; position: relative;
+    }
+    .record-spin { width: 235px; height: 235px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; }
+    #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); }
 
-        /* 唱針縮小 */
-        .tonearm {
-            position: absolute; width: 150px; top: -20px; right: 20px; z-index: 50;
-            transform-origin: 130px 30px; transform: rotate(-38deg); transition: 1.2s;
-        }
-        .tonearm.active { transform: rotate(5deg); }
+    .tonearm { position: absolute; width: 130px; top: -15px; right: 25px; z-index: 50; transform-origin: 110px 30px; transform: rotate(-38deg); transition: 1.2s; }
+    .tonearm.active { transform: rotate(5deg); }
 
-        /* 歌詞區改在下方 */
-        .lyrics-side { 
-            width: 90%; height: 250px; overflow: hidden; position: relative; 
-            mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); 
-        }
-        #lyrics-list { position: absolute; width: 100%; top: 100px; transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); list-style: none; padding: 0; margin: 0; text-align: center;}
-        .lyric-line { padding: 15px 0; font-size: 18px; color: var(--lyric-sub); transition: 0.4s; }
-        .lyric-line.active { color: #fff; font-size: 24px; font-weight: bold; text-shadow: 0 0 15px rgba(255,255,255,0.8); }
+    /* 歌詞區高度改為自動 */
+    .lyrics-side { 
+        width: 90%; 
+        height: 180px; 
+        overflow: hidden; 
+        position: relative; 
+        mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); 
+    }
+    #lyrics-list { position: absolute; width: 100%; top: 70px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center;}
+    .lyric-line { padding: 12px 0; font-size: 16px; color: var(--lyric-sub); }
+    .lyric-line.active { color: #fff; font-size: 20px; font-weight: bold; text-shadow: 0 0 15px rgba(255,255,255,0.8); }
 
-        /* 控制按鈕：發光白色 */
-        .turntable-controls { 
-            margin-top: 25px; display: flex; gap: 20px; font-size: 28px; color: #fff; 
-            text-shadow: 0 0 10px rgba(255,255,255,0.8); 
-        }
+    /* 控制按鈕修復 */
+    .turntable-controls { 
+        margin-top: 20px; 
+        display: flex; 
+        gap: 20px; 
+        font-size: 26px; 
+        color: #fff; 
+        text-shadow: 0 0 10px rgba(255,255,255,0.8); 
+        z-index: 100; /* 確保在最上層可點擊 */
+    }
+    .turntable-controls span { cursor: pointer; display: inline-block; }
 
-        /* [頂層] 操作面板 */
-        .ui-panel {
-            position: relative; width: 100%; padding-bottom: 30px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            z-index: 1000; display: flex; flex-direction: column; align-items: center;
-        }
-        .seek-box { width: 85%; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        #seek-bar { flex: 1; accent-color: var(--gold); }
-        .time-lab { font-size: 12px; opacity: 0.7; width: 40px; }
+    /* 底部 UI 面板縮小 */
+    .ui-panel {
+        position: relative; width: 100%; padding: 15px 0 30px;
+        background: rgba(0,0,0,0.8);
+        z-index: 1000; display: flex; flex-direction: column; align-items: center;
+    }
+    .seek-box { width: 85%; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    #seek-bar { flex: 1; accent-color: var(--gold); }
+    .time-lab { font-size: 11px; opacity: 0.7; width: 35px; }
 
-        .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 90%; }
-        .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; }
-        .btn-dl { background: var(--gold); color: #000; border: none; flex-basis: 100%; margin-top: 5px; }
-    </style>
+    .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 90%; }
+    .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+    .btn-dl { background: var(--gold); color: #000; border: none; flex-basis: 90%; margin-top: 5px; }
+</style>
 </head>
 <body>
 
