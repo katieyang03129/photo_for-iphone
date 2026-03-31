@@ -3,106 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MV Maker Mobile - Minimalist</title>
+    <title>MV Maker Mobile - Professional Edition</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.35); }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
 
+        /* 視窗容器 */
         .viewport { width: 100vw; height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* 背景模糊圖層 */
         #bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.3); z-index: 1; transition: 0.8s; }
         
-        /* 舞台：垂直排列 */
-        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; z-index: 10; padding: 20px 0; }
-
-        /* 唱機區 */
-        .player-side { position: relative; width: 280px; display: flex; justify-content: center; }
-        .platter {
-            width: 260px; height: 260px; border-radius: 50%;
-            background: #111; border: 5px solid #222;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            display: flex; align-items: center; justify-content: center; position: relative;
+        /* 舞台區域：垂直排列所有元件 */
+        .stage-wrapper { 
+            position: relative; flex: 1; width: 100%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; 
+            z-index: 10; padding: 20px 0; 
         }
 
-        /* 唱針：固定在右上方 */
+        /* 唱機區佈局 */
+        .player-side { position: relative; width: 280px; display: flex; justify-content: center; }
+        
+        /* 唱針：固定在唱機右上方 */
         .tonearm {
-            position: absolute; width: 130px; top: -10px; right: -10px; z-index: 100;
-            transform-origin: 110px 25px; transform: rotate(-38deg); transition: 1.2s;
-            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.5)); pointer-events: none;
+            position: absolute; width: 140px; top: -15px; right: -10px; z-index: 100;
+            transform-origin: 120px 25px; transform: rotate(-38deg); transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.6)); pointer-events: none;
         }
         .tonearm.active { transform: rotate(5deg); }
 
-        .record-spin { width: 245px; height: 245px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; position: relative; background: #000; }
+        /* 唱盤主體 */
+        .platter {
+            width: 260px; height: 260px; border-radius: 50%;
+            background: #111; border: 5px solid #222;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .record-spin { 
+            width: 245px; height: 245px; border-radius: 50%; overflow: hidden; 
+            animation: rotate 20s linear infinite; animation-play-state: paused; 
+            position: relative; background: #000; 
+        }
         #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s; }
         .placeholder-text { position: absolute; color: rgba(255,255,255,0.2); font-size: 14px; letter-spacing: 4px; text-shadow: 0 0 10px #fff; z-index: 0; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* 素雅控制按鈕：徹底棄用圖示符號 */
-        /* 控制按鈕容器 */
+        /* [重要] 素雅發光控制項 */
         .turntable-controls { 
-            margin-top: 25px; 
+            margin: 15px 0; 
             display: flex; 
             gap: 15px; 
             justify-content: center;
             pointer-events: auto;
         }
-        
-        /* 讓按鈕變大、變亮的核心設定 */
         .turntable-controls span { 
-            cursor: pointer; 
-            display: inline-block; 
-            width: 60px; /* 加寬按鈕，方便點按 */
-            height: 45px;
-            line-height: 45px;
-            text-align: center;
-            
-            color: #fff;
-            font-size: 20px;     /* 字體調大，發光才明顯 */
-            font-weight: 500;     /* 稍微加粗，增加發光面積 */
-            letter-spacing: 1px;
-            opacity: 0.9;
-            
-            /* [多層發光魔法]：第一層白光 + 第二層擴散暈染 */
-            text-shadow: 
-                0 0 10px #fff, 
-                0 0 20px rgba(255,255,255,0.6),
-                0 0 30px rgba(255,255,255,0.3);
-                
+            cursor: pointer; display: inline-block; width: 60px; text-align: center;
+            color: #fff; font-size: 16px; font-weight: 500; letter-spacing: 1px; opacity: 0.9;
+            /* 三層發光效果 */
+            text-shadow: 0 0 10px #fff, 0 0 20px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.2);
             transition: 0.3s;
         }
-        
-        /* 按下去的視覺回饋 */
-        .turntable-controls span:active {
-            transform: scale(0.9);
-            text-shadow: 0 0 5px #fff;
-        }
+        .turntable-controls span:active { transform: scale(0.9); opacity: 1; }
 
-        /* 歌詞區 */
-        .lyrics-side { width: 90%; height: 160px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
-        #lyrics-list { position: absolute; width: 100%; top: 65px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
-        .lyric-line { padding: 10px 0; font-size: 16px; color: var(--lyric-sub); line-height: 1.4; }
-        .lyric-line.active { color: #fff; font-size: 20px; font-weight: bold; text-shadow: 0 0 15px #fff; }
+        /* 歌詞區域 */
+        .lyrics-side { width: 90%; height: 180px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
+        #lyrics-list { position: absolute; width: 100%; top: 75px; transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
+        .lyric-line { padding: 12px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
+        .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; opacity: 1; }
 
-        /* 操作面板 */
+        /* 底部 UI 面板 */
         .ui-panel { position: relative; width: 100%; padding-bottom: 35px; background: linear-gradient(transparent, #000); z-index: 1000; display: flex; flex-direction: column; align-items: center; }
-        .seek-box { width: 85%; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-        #seek-bar { flex: 1; accent-color: var(--gold); }
-        .time-lab { font-size: 11px; opacity: 0.7; }
+        .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); }
+        .time-lab { font-size: 11px; font-family: monospace; opacity: 0.7; min-width: 40px; text-align: center; }
 
-        .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 90%; }
-        .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
-        .btn-dl { background: var(--gold); color: #000; border: none; flex-basis: 90%; margin-top: 5px; padding: 12px; font-weight: bold; }
+        .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 90%; }
+        .btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .btn-dl { background: var(--gold); color: #000; border: none; flex-basis: 90%; margin-top: 8px; padding: 12px; font-size: 14px; }
     </style>
 </head>
 <body>
+
     <div class="viewport">
         <div id="bg"></div>
         <div class="stage-wrapper">
             <div class="player-side">
                 <svg class="tonearm" id="arm" viewBox="0 0 250 300">
-                    <circle cx="190" cy="40" r="22" fill="#333" stroke="#555" stroke-width="2"/>
-                    <path d="M190,40 L190,130 L160,210 L145,240" stroke="#bbb" stroke-width="10" fill="none" stroke-linecap="round"/>
-                    <rect x="130" y="240" width="30" height="40" rx="3" fill="#222" />
+                    <circle cx="190" cy="40" r="22" fill="#222" stroke="#444" stroke-width="2"/>
+                    <path d="M190,40 L190,130 L160,210 L145,240" stroke="#e0e0e0" stroke-width="10" fill="none" stroke-linecap="round"/>
+                    <rect x="130" y="240" width="30" height="40" rx="3" fill="#1a1a1a" />
                 </svg>
                 <div class="platter">
                     <div class="record-spin" id="spin-box">
@@ -124,6 +114,7 @@
                 <ul id="lyrics-list"><li class="lyric-line">尚未載入歌詞...</li></ul>
             </div>
         </div>
+
         <div class="ui-panel">
             <div class="seek-box">
                 <span id="cur-time" class="time-lab">00:00</span>
@@ -150,19 +141,27 @@
         const lyricsList = document.getElementById('lyrics-list');
         const recordImg = document.getElementById('record-img');
         const arm = document.getElementById('arm');
+        const spinBox = document.getElementById('spin-box');
         let lyricsData = [];
 
+        // 圖片處理
         document.getElementById('up-img').onchange = (e) => {
             const url = URL.createObjectURL(e.target.files[0]);
             recordImg.src = url; recordImg.style.opacity = 1;
             document.getElementById('bg').style.backgroundImage = `url(${url})`;
         };
 
+        // 音樂處理
         document.getElementById('up-mp3').onchange = (e) => {
             audio.src = URL.createObjectURL(e.target.files[0]);
-            audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('total-time').innerText = formatTime(audio.duration); };
+            audio.onloadedmetadata = () => { 
+                seekBar.max = audio.duration; 
+                document.getElementById('total-time').innerText = formatTime(audio.duration); 
+            };
         };
+        seekBar.oninput = () => { audio.currentTime = seekBar.value; };
 
+        // 歌詞處理 (強力過濾器)
         document.getElementById('up-lrc').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -171,7 +170,7 @@
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        // 強力過濾所有括號內容
+                        // 清除所有括號雜訊
                         let text = line.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/<.*?>/g, '').replace(/\{.*?\}/g, '').trim();
                         return text ? { time, text } : null;
                     }
@@ -182,21 +181,26 @@
             reader.readAsText(e.target.files[0]);
         };
 
+        // 播放控制
         function togglePlay() {
+            const btn = document.getElementById('btn-toggle');
             if(audio.paused) { 
                 audio.play(); 
-                document.getElementById('spin-box').style.animationPlayState='running'; 
+                spinBox.style.animationPlayState = 'running'; 
                 arm.classList.add('active'); 
-                document.getElementById('btn-toggle').innerText = "PAUSE";
+                btn.innerText = "PAUSE";
             } else { 
                 audio.pause(); 
-                document.getElementById('spin-box').style.animationPlayState='paused'; 
+                spinBox.style.animationPlayState = 'paused'; 
                 arm.classList.remove('active'); 
-                document.getElementById('btn-toggle').innerText = "PLAY";
+                btn.innerText = "PLAY";
             }
         }
         document.getElementById('btn-toggle').onclick = togglePlay;
+        document.getElementById('btn-prev').onclick = () => { audio.currentTime = 0; };
+        document.getElementById('btn-next').onclick = () => { audio.currentTime += 10; };
 
+        // 歌詞滾動
         audio.ontimeupdate = () => {
             seekBar.value = audio.currentTime;
             document.getElementById('cur-time').innerText = formatTime(audio.currentTime);
@@ -206,13 +210,20 @@
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 44}px)`;
+                    lyricsList.style.transform = `translateY(-${index * 46}px)`; // 依照行高捲動
                 }
             }
         };
 
-        function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
-        seekBar.oninput = () => { audio.currentTime = seekBar.value; };
+        function formatTime(s) { 
+            const m = Math.floor(s/60); 
+            const sec = Math.floor(s%60); 
+            return `${m}:${sec.toString().padStart(2,'0')}`; 
+        }
+
+        document.getElementById('dl-btn').onclick = () => {
+            alert("Demo 提示：手機版不支援影片錄製，請使用電腦版 Chrome 進行輸出。");
+        };
     </script>
 </body>
 </html>
