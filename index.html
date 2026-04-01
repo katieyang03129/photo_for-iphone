@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Final Lyric Fix</title>
+    <title>MV Maker Pro - Lyric Purified</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
@@ -138,7 +138,7 @@
             audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('total-time').innerText = formatTime(audio.duration); };
         };
         
-        // [關鍵修正] 深度過濾所有類型的時間標籤雜訊
+        // 僅針對歌詞內容進行純淨化處理，其餘邏輯不變
         document.getElementById('up-lrc').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -147,11 +147,11 @@
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        // 強力過濾：1.開頭標籤 2.句子中間的 <00:00.00> 3.句子中間的 (00:00.00) 或 {00:00.00}
-                        let text = line.replace(/\[.*?\]/g, '')        // 刪除 [xx:xx.xx]
-                                       .replace(/<.*?>/g, '')        // 刪除 <xx:xx.xx> (逐字標籤)
-                                       .replace(/\(.*\)/g, '')       // 刪除 (xx:xx.xx)
-                                       .replace(/\{.*\}/g, '')       // 刪除 {xx:xx.xx}
+                        // 強力過濾所有標籤：包括開頭的 [xx:xx] 與中間的 <xx:xx> 或 (xx:xx)
+                        let text = line.replace(/\[.*?\]/g, '')        
+                                       .replace(/<.*?>/g, '')        
+                                       .replace(/\(.*?\)/g, '')      
+                                       .replace(/\{.*?\}/g, '')      
                                        .trim();
                         return text ? { time, text } : null;
                     }
