@@ -46,7 +46,7 @@
             mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%); 
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
         }
-        #lyrics-list { position: absolute; width: 100%; top: 90px; transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
+        #lyrics-list { position: absolute; width: 100%; top: 88px; transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
         .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
@@ -163,13 +163,13 @@
         audio.ontimeupdate = () => {
             seekBar.value = audio.currentTime;
             document.getElementById('cur-time').innerText = formatTime(audio.currentTime);
-            const index = lyricsData.findIndex((l, i) => audio.currentTime >= l.time && (!lyricsData[i+1] || audio.currentTime < lyricsData[i+1].time));
+            const index = lyricsData.findIndex((l, i) => (audio.currentTime + 0.3) >= l.time && (!lyricsData[i+1] || audio.currentTime < lyricsData[i+1].time));
             if (index !== -1) {
                 const lines = document.querySelectorAll('.lyric-line');
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 42}px)`;
+                    lyricsList.style.transform = `translateY(-${index * 46}px)`;
                 }
             }
         };
