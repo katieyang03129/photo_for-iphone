@@ -3,59 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Quad Layout</title>
+    <title>MV Maker Pro - Quad Fixed</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
 
         .viewport { 
             width: 100vw; height: 100vh; display: flex; flex-direction: column; 
-            /* 調整 padding 以確保在網址列上方顯示 */
-            padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 20px) 0;
+            /* 增加底部安全距離，避開手機網址列 */
+            padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 30px) 0;
             box-sizing: border-box; position: relative;
         }
         
         #bg { position: absolute; inset: -5%; background-size: cover; background-position: center; filter: brightness(0.75) blur(18px); z-index: 1; transition: 0.8s; }
         
-        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; gap: 5px; }
+        /* 舞台區：更緊湊，把內容往上提 */
+        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; gap: 4px; }
 
-        .player-side { position: relative; width: 240px; display: flex; justify-content: center; margin-bottom: 2px; }
-        .tonearm { position: absolute; width: 110px; top: -5px; right: 0px; z-index: 100; transform-origin: 100px 20px; transform: rotate(-38deg); transition: 1.2s; }
+        .player-side { position: relative; width: 220px; display: flex; justify-content: center; margin-bottom: 2px; }
+        .tonearm { position: absolute; width: 100px; top: -5px; right: 0px; z-index: 100; transform-origin: 90px 20px; transform: rotate(-38deg); transition: 1.2s; }
         .tonearm.active { transform: rotate(5deg); }
 
         .platter {
-            width: 210px; height: 210px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2);
+            width: 190px; height: 190px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2);
             box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .record-spin { width: 198px; height: 198px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; background: #000; }
+        .record-spin { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; background: #000; }
         #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); transition: opacity 0.4s; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .turntable-controls { margin: 8px 0; display: flex; gap: 20px; justify-content: center; }
-        .turntable-controls span { cursor: pointer; font-size: 28px; text-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 5px #fff; -webkit-text-fill-color: white; }
+        .turntable-controls { margin: 10px 0; display: flex; gap: 18px; justify-content: center; }
+        .turntable-controls span { cursor: pointer; font-size: 26px; text-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 5px #fff; -webkit-text-fill-color: white; }
 
-        .lyrics-side { width: 90%; height: 150px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); margin: 5px 0; }
-        #lyrics-list { position: absolute; width: 100%; top: 60px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
-        .lyric-line { padding: 10px 0; font-size: 16px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
-        .lyric-line.active { color: #fff; font-size: 19px; font-weight: bold; text-shadow: 0 0 15px rgba(0,0,0,0.8), 0 0 5px #fff; }
+        .lyrics-side { width: 90%; height: 140px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); margin: 5px 0; }
+        #lyrics-list { position: absolute; width: 100%; top: 55px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
+        .lyric-line { padding: 10px 0; font-size: 15px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
+        .lyric-line.active { color: #fff; font-size: 18px; font-weight: bold; text-shadow: 0 0 15px rgba(0,0,0,0.8), 0 0 5px #fff; }
 
-        /* 底部操作面板 */
+        /* 底部操作面板：徹底移除長條按鈕 */
         .ui-panel { position: relative; width: 100%; z-index: 1000; display: flex; flex-direction: column; align-items: center; }
         .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
         #seek-bar { flex: 1; height: 4px; accent-color: var(--gold); }
-        .time-lab { font-size: 11px; opacity: 0.8; min-width: 40px; text-align: center; font-family: monospace; }
+        .time-lab { font-size: 10px; opacity: 0.8; min-width: 35px; text-align: center; font-family: monospace; }
 
-        /* [核心修正] 四個按鈕並排 */
-        .btn-row { display: flex; justify-content: center; gap: 6px; width: 95%; }
+        /* [關鍵修正] 四顆小按鈕橫向排開，徹底避開底部遮擋 */
+        .btn-row { 
+            display: flex; 
+            justify-content: center; 
+            gap: 8px; 
+            width: 95%; 
+            padding: 0 10px;
+        }
         .btn { 
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
-            color: #fff; padding: 10px 12px; border-radius: 18px; font-size: 11px; font-weight: bold; 
+            flex: 1; /* 讓四個按鈕平均分配寬度 */
+            background: rgba(255,255,255,0.12); 
+            border: 1px solid rgba(255,255,255,0.25); 
+            color: #fff; 
+            padding: 12px 0; 
+            border-radius: 15px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            text-align: center;
             white-space: nowrap;
         }
-        /* 錄製按鈕變成第四個，用金色點綴 */
+        /* 錄製鈕改為第四顆按鈕，使用橘金色區分 */
         .btn-rec { 
-            background: var(--gold) !important; color: #000 !important; border: none !important; 
+            background: var(--gold) !important; 
+            color: #000 !important; 
+            border: none !important;
         }
     </style>
 </head>
@@ -91,7 +107,7 @@
                 <label class="btn" for="up-img">📸 圖片</label>
                 <label class="btn" for="up-mp3">🎵 音樂</label>
                 <label class="btn" for="up-lrc">📄 LRC</label>
-                <div class="btn btn-rec" id="rec-btn">💾 錄製 MV</div>
+                <div class="btn btn-rec" id="rec-btn" onclick="alert('iPad/iPhone 請使用內建錄影。')">💾 錄製</div>
             </div>
         </div>
     </div>
@@ -157,14 +173,13 @@
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 42}px)`;
+                    lyricsList.style.transform = `translateY(-${index * 38}px)`;
                 }
             }
         };
 
         seekBar.oninput = () => { audio.currentTime = seekBar.value; };
         function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
-        document.getElementById('rec-btn').onclick = () => { alert("iPad/iPhone 請使用內建錄影。"); };
     </script>
 </body>
 </html>
