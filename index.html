@@ -47,7 +47,7 @@
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
         }
         #lyrics-list { position: absolute; width: 100%; top: 88px; transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
-        .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
+        .lyric-line { padding: 12px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
         /* [底部面板修正] 不再使用 Absolute 或 Fixed，而是自然排在流的末端 */
@@ -169,7 +169,7 @@
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 48}px)`;
+                    lyricsList.style.transform = `translateY(-${index * 46}px)`;
                 }
             }
         };
