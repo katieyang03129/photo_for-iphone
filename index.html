@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Pure Lyric Edition</title>
+    <title>MV Maker Pro - Final Lyric Fix</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
@@ -16,12 +16,11 @@
         
         #bg { position: absolute; inset: -5%; background-size: cover; background-position: center; filter: brightness(0.5) blur(20px); z-index: 1; transition: 0.8s; }
         
-        /* 舞台區 */
         .stage-wrapper { 
             position: relative; flex: 1; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
             justify-content: center; z-index: 10; 
-            margin-bottom: 165px; /* 避開底部面板 */
+            margin-bottom: 165px; 
         }
 
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; margin-bottom: 5px; }
@@ -49,7 +48,6 @@
         .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
-        /* 底部固定面板 */
         .ui-panel { 
             position: fixed; 
             bottom: 0; 
@@ -98,7 +96,7 @@
                 </div>
             </div>
             <div class="turntable-controls">
-                <span id="btn-loop">&#10227;&#xFE0E;</span><span id="btn-prev">&#9194;&#xFE0E;</span><span id="btn-toggle">&#9654;&#xFE0E;</span><span id="btn-next">&#9193;&#xFE0E;</span><span id="btn-like">&#9825;&#xFE0E;</span>
+                <span id="btn-loop">&#10227;&#xFE0E;</span><span id="btn-prev">&#9194;&#xFE0E;</span><span id="btn-toggle" onclick="togglePlay()">&#9654;&#xFE0E;</span><span id="btn-next">&#9193;&#xFE0E;</span><span id="btn-like">&#9825;&#xFE0E;</span>
             </div>
             <div class="lyrics-side"><ul id="lyrics-list"><li class="lyric-line">已準備就緒，請載入素材</li></ul></div>
         </div>
@@ -140,28 +138,29 @@
             audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('total-time').innerText = formatTime(audio.duration); };
         };
         
-        // [修正] 歌詞解析邏輯：強力過濾 ti, ar, al 等雜訊
+        // [關鍵修正] 深度過濾所有類型的時間標籤雜訊
         document.getElementById('up-lrc').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const lines = ev.target.result.split('\n');
                 lyricsData = lines.map(line => {
-                    // 正則表達式：確保開頭必須是 [mm:ss]
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        // 過濾掉時間標籤、括號、以及其他 LRC 自定義標籤
-                        let text = line.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').trim();
+                        // 強力過濾：1.開頭標籤 2.句子中間的 <00:00.00> 3.句子中間的 (00:00.00) 或 {00:00.00}
+                        let text = line.replace(/\[.*?\]/g, '')        // 刪除 [xx:xx.xx]
+                                       .replace(/<.*?>/g, '')        // 刪除 <xx:xx.xx> (逐字標籤)
+                                       .replace(/\(.*\)/g, '')       // 刪除 (xx:xx.xx)
+                                       .replace(/\{.*\}/g, '')       // 刪除 {xx:xx.xx}
+                                       .trim();
                         return text ? { time, text } : null;
                     }
                     return null;
-                }).filter(x => x !== null); // 徹底移除不含時間標籤的行 (如 [ti:xxx])
+                }).filter(x => x !== null);
                 
-                if (lyricsData.length > 0) {
-                    lyricsList.innerHTML = lyricsData.map(l => `<li class="lyric-line">${l.text}</li>`).join('');
-                } else {
-                    lyricsList.innerHTML = `<li class="lyric-line">LRC 格式不正確或無歌詞內容</li>`;
-                }
+                lyricsList.innerHTML = lyricsData.length > 0 ? 
+                    lyricsData.map(l => `<li class="lyric-line">${l.text}</li>`).join('') : 
+                    `<li class="lyric-line">LRC 格式不正確</li>`;
             };
             reader.readAsText(e.target.files[0]);
         };
@@ -175,7 +174,6 @@
                 document.getElementById('btn-toggle').innerHTML = "&#9654;&#xFE0E;";
             }
         }
-        document.getElementById('btn-toggle').onclick = togglePlay;
         document.getElementById('btn-prev').onclick = () => { audio.currentTime = 0; };
         document.getElementById('btn-next').onclick = () => { audio.currentTime += 10; };
 
