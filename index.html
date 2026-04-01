@@ -42,11 +42,11 @@
         .turntable-controls span { cursor: pointer; font-size: 32px; text-shadow: 0 0 10px #fff; -webkit-text-fill-color: white; }
 
         .lyrics-side { 
-            width: 90%; height: 140px; overflow: hidden; position: relative; 
-            mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%); 
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+            width: 90%; height: 220px; overflow: hidden; position: relative; 
+            mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%); 
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
         }
-        #lyrics-list { position: absolute; width: 100%; top: 50px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
+        #lyrics-list { position: absolute; width: 100%; top: 90px; transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
         .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
