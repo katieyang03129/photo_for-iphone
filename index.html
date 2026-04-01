@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Stable Luminous</title>
+    <title>MV Maker Pro - Clear Background</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
@@ -14,11 +14,11 @@
             box-sizing: border-box; position: relative;
         }
         
-        /* 背景光暈優化 */
+        /* [核心優化] 提高亮度，減少模糊，讓背景圖變明顯 */
         #bg { 
-            position: absolute; inset: -10%; /* 擴大範圍防止模糊黑邊 */
+            position: absolute; inset: 0; 
             background-size: cover; background-position: center; 
-            filter: brightness(0.45) blur(30px); 
+            filter: brightness(0.8) blur(15px); /* 亮度 0.8 非常清晰 */
             z-index: 1; transition: 0.8s;
         }
         
@@ -27,61 +27,51 @@
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; margin-bottom: 5px; }
         .tonearm { 
             position: absolute; width: 130px; top: -10px; right: -10px; z-index: 100; 
-            transform-origin: 110px 25px; transform: rotate(-38deg); transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: 110px 25px; transform: rotate(-38deg); transition: 1.2s;
         }
         .tonearm.active { transform: rotate(5deg); }
 
-        /* 唱盤比例適配 */
         .platter {
-            width: 240px; height: 240px; border-radius: 50%; background: rgba(20,20,20,0.8); border: 2px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 50px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; position: relative;
-            backdrop-filter: blur(5px);
+            width: 240px; height: 240px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; position: relative;
         }
         .record-spin { width: 226px; height: 226px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; background: #000; }
         #record-img { position: absolute; height: 100%; min-width: 100%; left: 50%; transform: translateX(-50%); transition: opacity 0.4s; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* 霓虹控制鈕 */
-        .turntable-controls { margin: 15px 0; display: flex; gap: 20px; justify-content: center; align-items: center; }
+        .turntable-controls { margin: 15px 0; display: flex; gap: 20px; justify-content: center; }
         .turntable-controls span { 
             cursor: pointer; font-size: 32px; 
-            text-shadow: 0 0 10px #fff, 0 0 20px rgba(255,255,255,0.6); 
-            -webkit-text-fill-color: white; transition: 0.2s;
+            text-shadow: 0 0 15px rgba(0,0,0,0.8), 0 0 5px #fff; 
+            -webkit-text-fill-color: white; 
         }
-        .turntable-controls span:active { transform: scale(0.85); }
 
-        /* 歌詞區佈局 */
         .lyrics-side { 
-            width: 90%; height: 220px; overflow: hidden; position: relative; 
+            width: 90%; height: 240px; overflow: hidden; position: relative; 
             mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); 
             margin: 5px 0;
         }
-        #lyrics-list { position: absolute; width: 100%; top: 85px; transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); list-style: none; padding: 0; margin: 0; text-align: center; }
-        .lyric-line { padding: 12px 0; font-size: 16px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
-        .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
+        #lyrics-list { position: absolute; width: 100%; top: 90px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
+        .lyric-line { padding: 12px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
+        .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px rgba(0,0,0,0.8), 0 0 5px #fff; }
 
-        /* 隱藏工具鈕 */
-        .upload-tools { position: absolute; bottom: 5px; right: 10px; display: flex; gap: 10px; z-index: 100; opacity: 0.3; transition: 0.3s; }
-        .upload-tools:hover { opacity: 0.8; }
-        .mini-btn { background: rgba(255,255,255,0.1); color: #fff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 1px solid rgba(255,255,255,0.2); }
-
-        /* 底部毛玻璃面板 */
-        .ui-panel { 
-            position: relative; width: 100%; padding-bottom: 30px; z-index: 1000; 
-            display: flex; flex-direction: column; align-items: center; 
-            background: linear-gradient(transparent, rgba(255,255,255,0.05)); 
-            backdrop-filter: blur(15px);
+        /* [核心修正] 讓按鈕在亮背景下依然清晰 */
+        .upload-tools { position: absolute; bottom: 10px; right: 10px; display: flex; gap: 12px; z-index: 1000; }
+        .mini-btn { 
+            background: rgba(0,0,0,0.5); color: #fff; 
+            width: 38px; height: 38px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 18px; border: 1px solid rgba(255,255,255,0.5);
         }
+
+        /* 底部區域：全透明處理 */
+        .ui-panel { position: relative; width: 100%; padding-bottom: 30px; z-index: 1000; display: flex; flex-direction: column; align-items: center; }
         .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); cursor: pointer; }
-        .time-lab { font-size: 11px; opacity: 0.5; min-width: 40px; text-align: center; font-family: monospace; }
+        #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); }
+        .time-lab { font-size: 11px; opacity: 0.8; min-width: 40px; text-align: center; font-family: monospace; }
 
-        .btn-rec { 
-            background: var(--gold); color: #000; border: none; width: 85%; 
-            padding: 15px; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px;
-            box-shadow: 0 4px 20px rgba(243,156,18,0.3);
-        }
+        .btn-rec { background: var(--gold); color: #000; border: none; width: 85%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
@@ -103,11 +93,7 @@
             </div>
             
             <div class="turntable-controls">
-                <span id="btn-loop">&#10227;&#xFE0E;</span>
-                <span id="btn-prev">&#9194;&#xFE0E;</span>
-                <span id="btn-toggle">&#9654;&#xFE0E;</span>
-                <span id="btn-next">&#9193;&#xFE0E;</span>
-                <span id="btn-like">&#9825;&#xFE0E;</span>
+                <span id="btn-loop">&#10227;&#xFE0E;</span><span id="btn-prev">&#9194;&#xFE0E;</span><span id="btn-toggle">&#9654;&#xFE0E;</span><span id="btn-next">&#9193;&#xFE0E;</span><span id="btn-like">&#9825;&#xFE0E;</span>
             </div>
 
             <div class="lyrics-side">
@@ -130,9 +116,7 @@
         </div>
     </div>
 
-    <input type="file" id="up-img" accept="image/*" style="display:none">
-    <input type="file" id="up-mp3" accept="audio/mp3" style="display:none">
-    <input type="file" id="up-lrc" accept=".lrc" style="display:none">
+    <input type="file" id="up-img" accept="image/*" style="display:none"><input type="file" id="up-mp3" accept="audio/mp3" style="display:none"><input type="file" id="up-lrc" accept=".lrc" style="display:none">
     <audio id="audio-player"></audio>
 
     <script>
@@ -172,13 +156,12 @@
         };
 
         function togglePlay() {
-            const btn = document.getElementById('btn-toggle');
             if(audio.paused) { 
                 audio.play(); spinBox.style.animationPlayState = 'running'; arm.classList.add('active'); 
-                btn.innerHTML = "&#9208;&#xFE0E;"; 
+                document.getElementById('btn-toggle').innerHTML = "&#9208;&#xFE0E;";
             } else { 
                 audio.pause(); spinBox.style.animationPlayState = 'paused'; arm.classList.remove('active'); 
-                btn.innerHTML = "&#9654;&#xFE0E;"; 
+                document.getElementById('btn-toggle').innerHTML = "&#9654;&#xFE0E;";
             }
         }
         document.getElementById('btn-toggle').onclick = togglePlay;
@@ -201,7 +184,6 @@
 
         seekBar.oninput = () => { audio.currentTime = seekBar.value; };
         function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
-        document.getElementById('rec-btn').onclick = () => { alert("iPad/iPhone 請使用內建錄影功能。"); };
     </script>
 </body>
 </html>
