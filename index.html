@@ -3,27 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Final Quad</title>
+    <title>MV Maker Pro - Final Safe Zone</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
 
         .viewport { 
             width: 100vw; height: 100vh; display: flex; flex-direction: column; 
-            padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+            padding: env(safe-area-inset-top) 0 0 0; /* 頂部安全區 */
             box-sizing: border-box; background: #000; position: relative;
         }
         
         #bg { position: absolute; inset: -5%; background-size: cover; background-position: center; filter: brightness(0.5) blur(20px); z-index: 1; transition: 0.8s; }
         
-        /* 舞台區：強烈置中排列 */
-        .stage-wrapper { position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; gap: 8px; }
+        /* 舞台區：內容往上提，留出底部空間 */
+        .stage-wrapper { 
+            position: relative; flex: 1; width: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: flex-start; /* 改為靠頂部開始 */
+            padding-top: 20px; /* 距離頂部一點點距離 */
+            z-index: 10; gap: 5px; 
+        }
 
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; margin-bottom: 5px; }
         .tonearm { position: absolute; width: 140px; top: -15px; right: -10px; z-index: 100; transform-origin: 120px 25px; transform: rotate(-38deg); transition: 1.2s; }
         .tonearm.active { transform: rotate(5deg); }
 
-        /* 恢復大唱片 260px */
         .platter {
             width: 260px; height: 260px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 4px solid rgba(255,255,255,0.2);
             box-shadow: 0 10px 45px rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; position: relative;
@@ -33,21 +38,26 @@
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .turntable-controls { margin: 12px 0; display: flex; gap: 20px; justify-content: center; }
+        .turntable-controls { margin: 10px 0; display: flex; gap: 20px; justify-content: center; }
         .turntable-controls span { cursor: pointer; font-size: 32px; text-shadow: 0 0 10px #fff; -webkit-text-fill-color: white; }
 
-        .lyrics-side { width: 90%; height: 160px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); }
-        #lyrics-list { position: absolute; width: 100%; top: 65px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
+        .lyrics-side { width: 90%; height: 140px; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent); }
+        #lyrics-list { position: absolute; width: 100%; top: 50px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
         .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
-        .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
+        .active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
-        /* 底部操作面板 */
-        .ui-panel { position: relative; width: 100%; z-index: 1000; display: flex; flex-direction: column; align-items: center; padding-bottom: 25px; }
+        /* [關鍵修正] 底部操作面板大搬家 */
+        .ui-panel { 
+            position: absolute; 
+            bottom: calc(env(safe-area-inset-bottom) + 65px); /* 強制墊高，完全避開導覽列 */
+            width: 100%; z-index: 1000; 
+            display: flex; flex-direction: column; align-items: center; 
+        }
+        
         .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
         #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); }
         .time-lab { font-size: 11px; opacity: 0.8; min-width: 40px; text-align: center; font-family: monospace; }
 
-        /* [關鍵] 四顆小按鈕橫向排開 */
         .btn-row { 
             display: flex; 
             justify-content: center; 
@@ -66,12 +76,7 @@
             text-align: center;
             white-space: nowrap;
         }
-        /* 錄製鈕改為金色按鈕 */
-        .btn-rec { 
-            background: var(--gold) !important; 
-            color: #000 !important; 
-            border: none !important;
-        }
+        .btn-rec { background: var(--gold) !important; color: #000 !important; border: none !important; }
     </style>
 </head>
 <body>
@@ -101,7 +106,6 @@
                 <input type="range" id="seek-bar" value="0" step="0.01">
                 <span id="total-time" class="time-lab">00:00</span>
             </div>
-            
             <div class="btn-row">
                 <label class="btn" for="up-img">📸 圖片</label>
                 <label class="btn" for="up-mp3">🎵 音樂</label>
