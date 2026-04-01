@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Lyric Purified</title>
+    <title>MV Maker Pro - Final Stable Edition</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
@@ -16,11 +16,12 @@
         
         #bg { position: absolute; inset: -5%; background-size: cover; background-position: center; filter: brightness(0.5) blur(20px); z-index: 1; transition: 0.8s; }
         
+        /* 舞台區：確保內容置中並避開底部面板 */
         .stage-wrapper { 
             position: relative; flex: 1; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
             justify-content: center; z-index: 10; 
-            margin-bottom: 165px; 
+            margin-bottom: 160px; 
         }
 
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; margin-bottom: 5px; }
@@ -48,6 +49,7 @@
         .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
+        /* 底部固定面板：鎖定高度，避開網址列 */
         .ui-panel { 
             position: fixed; 
             bottom: 0; 
@@ -138,20 +140,21 @@
             audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('total-time').innerText = formatTime(audio.duration); };
         };
         
-        // 僅針對歌詞內容進行純淨化處理，其餘邏輯不變
+        // 核心修正：歌詞淨化解析邏輯
         document.getElementById('up-lrc').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const lines = ev.target.result.split('\n');
                 lyricsData = lines.map(line => {
+                    // 只匹配帶有時間標籤 [mm:ss.xx] 的行
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        // 強力過濾所有標籤：包括開頭的 [xx:xx] 與中間的 <xx:xx> 或 (xx:xx)
-                        let text = line.replace(/\[.*?\]/g, '')        
-                                       .replace(/<.*?>/g, '')        
-                                       .replace(/\(.*?\)/g, '')      
-                                       .replace(/\{.*?\}/g, '')      
+                        // 強力過濾所有類型標籤：[標籤]、<逐字標籤>、(括號標籤)
+                        let text = line.replace(/\[.*?\]/g, '')
+                                       .replace(/<.*?>/g, '')
+                                       .replace(/\(.*?\)/g, '')
+                                       .replace(/\{.*?\}/g, '')
                                        .trim();
                         return text ? { time, text } : null;
                     }
@@ -160,7 +163,7 @@
                 
                 lyricsList.innerHTML = lyricsData.length > 0 ? 
                     lyricsData.map(l => `<li class="lyric-line">${l.text}</li>`).join('') : 
-                    `<li class="lyric-line">LRC 格式不正確</li>`;
+                    `<li class="lyric-line">無有效歌詞內容</li>`;
             };
             reader.readAsText(e.target.files[0]);
         };
