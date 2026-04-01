@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MV Maker Pro - Final Stable</title>
+    <title>MV Maker Pro - Final adaptive</title>
     <style>
         :root { --gold: #f39c12; --lyric-sub: rgba(255,255,255,0.3); }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
 
+        /* [關鍵] 使用 svh 確保在任何情況下內容都在網址列上方 */
         .viewport { 
-            width: 100vw; height: 100vh; display: flex; flex-direction: column; 
-            padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+            width: 100vw; height: 100svh; display: flex; flex-direction: column; 
+            padding: env(safe-area-inset-top) 0 0 0;
             box-sizing: border-box; background: #000; position: relative;
         }
         
         #bg { position: absolute; inset: -5%; background-size: cover; background-position: center; filter: brightness(0.5) blur(20px); z-index: 1; transition: 0.8s; }
         
-        /* 舞台區：自動置中所有物件 */
+        /* 舞台區：改為 center，讓內容在大螢幕也能均勻分佈 */
         .stage-wrapper { 
             position: relative; flex: 1; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; z-index: 10; gap: 8px; 
+            justify-content: center; z-index: 10; gap: 10px;
         }
 
         .player-side { position: relative; width: 280px; display: flex; justify-content: center; margin-bottom: 5px; }
         .tonearm { position: absolute; width: 140px; top: -15px; right: -10px; z-index: 100; transform-origin: 120px 25px; transform: rotate(-38deg); transition: 1.2s; }
         .tonearm.active { transform: rotate(5deg); }
 
-        /* 260px 大唱片 */
+        /* 大唱片 260px */
         .platter {
-            width: 260px; height: 260px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 5px solid rgba(255,255,255,0.2);
+            width: 260px; height: 260px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2);
             box-shadow: 0 10px 45px rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; position: relative;
         }
         .record-spin { width: 245px; height: 245px; border-radius: 50%; overflow: hidden; animation: rotate 20s linear infinite; animation-play-state: paused; background: #000; }
@@ -40,40 +41,33 @@
         .turntable-controls { margin: 10px 0; display: flex; gap: 20px; justify-content: center; }
         .turntable-controls span { cursor: pointer; font-size: 32px; text-shadow: 0 0 10px #fff; -webkit-text-fill-color: white; }
 
-        /* 歌詞顯示區 */
         .lyrics-side { 
-            width: 90%; height: 160px; overflow: hidden; position: relative; 
+            width: 90%; height: 140px; overflow: hidden; position: relative; 
             mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%); 
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
         }
-        #lyrics-list { position: absolute; width: 100%; top: 65px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
-        .lyric-line { padding: 12px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
+        #lyrics-list { position: absolute; width: 100%; top: 50px; transition: 0.4s; list-style: none; padding: 0; margin: 0; text-align: center; }
+        .lyric-line { padding: 10px 0; font-size: 17px; color: var(--lyric-sub); line-height: 1.4; transition: 0.3s; }
         .lyric-line.active { color: #fff; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #fff; }
 
-        /* 底部操作面板：保險距離確保不超框 */
+        /* [底部面板修正] 不再使用 Absolute 或 Fixed，而是自然排在流的末端 */
         .ui-panel { 
             position: relative; width: 100%; z-index: 1000; 
             display: flex; flex-direction: column; align-items: center; 
-            padding-bottom: 20px; /* 避開底部導覽列的安全墊高 */
+            /* 關鍵：透過 padding-bottom 確保避開小白條，但不額外墊高 */
+            padding-bottom: calc(env(safe-area-inset-bottom) + 10px); 
+            background: linear-gradient(transparent, rgba(0,0,0,0.5) 50%);
         }
         
         .seek-box { width: 85%; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
         #seek-bar { flex: 1; height: 5px; accent-color: var(--gold); }
         .time-lab { font-size: 11px; opacity: 0.8; min-width: 40px; text-align: center; font-family: monospace; }
 
-        /* 四顆按鈕並排 */
         .btn-row { display: flex; justify-content: center; gap: 6px; width: 95%; padding: 0 10px; }
         .btn { 
-            flex: 1; 
-            background: rgba(255,255,255,0.15); 
-            border: 1px solid rgba(255,255,255,0.3); 
-            color: #fff; 
-            padding: 12px 0; 
-            border-radius: 18px; 
-            font-size: 11px; 
-            font-weight: bold; 
-            text-align: center;
-            white-space: nowrap;
+            flex: 1; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); 
+            color: #fff; padding: 10px 0; border-radius: 18px; font-size: 11px; 
+            font-weight: bold; text-align: center; white-space: nowrap;
         }
         .btn-rec { background: var(--gold) !important; color: #000 !important; border: none !important; }
     </style>
@@ -93,14 +87,10 @@
                     <div class="record-spin" id="spin-box"><img id="record-img" src="" style="opacity:0;"></div>
                 </div>
             </div>
-            
             <div class="turntable-controls">
                 <span id="btn-loop">&#10227;&#xFE0E;</span><span id="btn-prev">&#9194;&#xFE0E;</span><span id="btn-toggle" onclick="togglePlay()">&#9654;&#xFE0E;</span><span id="btn-next">&#9193;&#xFE0E;</span><span id="btn-like">&#9825;&#xFE0E;</span>
             </div>
-
-            <div class="lyrics-side">
-                <ul id="lyrics-list"><li class="lyric-line">已準備就緒，請載入素材</li></ul>
-            </div>
+            <div class="lyrics-side"><ul id="lyrics-list"><li class="lyric-line">已準備就緒，請載入素材</li></ul></div>
         </div>
 
         <div class="ui-panel">
@@ -109,7 +99,6 @@
                 <input type="range" id="seek-bar" value="0" step="0.01">
                 <span id="total-time" class="time-lab">00:00</span>
             </div>
-            
             <div class="btn-row">
                 <label class="btn" for="up-img">📸 圖片</label>
                 <label class="btn" for="up-mp3">🎵 音樂</label>
@@ -141,7 +130,6 @@
             audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('total-time').innerText = formatTime(audio.duration); };
         };
         
-        // 歌詞核心過濾與逐字標籤掃除
         document.getElementById('up-lrc').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -150,17 +138,11 @@
                     const m = line.match(/\[(\d+):(\d+(\.\d+)?)\]/);
                     if (m) {
                         const time = parseInt(m[1]) * 60 + parseFloat(m[2]);
-                        // 清除所有形式的標籤雜質，只留歌詞文字
-                        let text = line.replace(/\[.*?\]/g, '')        // 刪除 [00:00.00]
-                                       .replace(/<.*?>/g, '')        // 刪除 <00:00.00> (逐字標籤)
-                                       .replace(/\(.*?\)/g, '')      // 刪除 (00:00.00)
-                                       .replace(/\{.*?\}/g, '')      // 刪除 {00:00.00}
-                                       .trim();
+                        let text = line.replace(/\[.*?\]/g, '').replace(/<.*?>/g, '').replace(/\(.*?\)/g, '').replace(/\{.*?\}/g, '').trim();
                         return text ? { time, text } : null;
                     }
                     return null;
                 }).filter(x => x !== null);
-                
                 lyricsList.innerHTML = lyricsData.map(l => `<li class="lyric-line">${l.text}</li>`).join('');
             };
             reader.readAsText(e.target.files[0]);
@@ -187,7 +169,7 @@
                 lines.forEach(l => l.classList.remove('active'));
                 if(lines[index]) {
                     lines[index].classList.add('active');
-                    lyricsList.style.transform = `translateY(-${index * 45}px)`;
+                    lyricsList.style.transform = `translateY(-${index * 42}px)`;
                 }
             }
         };
